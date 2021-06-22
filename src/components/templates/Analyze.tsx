@@ -1,6 +1,13 @@
 import React, { useRef, useState, VFC } from 'react'
 import * as posenet from '@tensorflow-models/posenet'
-import { Box, Button, HStack, Stack, useDisclosure } from '@chakra-ui/react'
+import {
+  Box,
+  Button,
+  Heading,
+  HStack,
+  Stack,
+  useDisclosure,
+} from '@chakra-ui/react'
 import styled from '@emotion/styled'
 import { drawKeypoints, drawSkeleton } from 'utils/utilities'
 import DeleteDialog from 'components/AlertDialog'
@@ -231,7 +238,10 @@ const Home: VFC = () => {
   const style2 = images[2].url !== '' && !state[2] ? 'absolute' : 'relative'
 
   return (
-    <Stack spacing={4} pb={8} pt={2}>
+    <Stack spacing={4} pb={8}>
+      <Heading as="h2" size="md" textAlign="center">
+        スタート動作分析（1人用）
+      </Heading>
       <Video id="video" src={fileURL} controls ref={videoRef} />
       <Button colorScheme="teal" variant="outline" p={0} w="100%">
         <Label>

@@ -3,6 +3,7 @@ import { AppProps } from 'next/dist/next-server/lib/router/router'
 import { ChakraProvider } from '@chakra-ui/react'
 import Head from 'next/head'
 import { theme } from 'styles/theme'
+import '@tensorflow/tfjs'
 
 const MyApp: NextPage<AppProps> = ({ Component, pageProps }: AppProps) => {
   return (

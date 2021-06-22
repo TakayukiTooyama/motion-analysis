@@ -1,16 +1,13 @@
+import { Layout } from 'components/layout'
+import Analyze from 'components/templates/Analyze'
 import { NextPage } from 'next'
-import Head from 'next/head'
 
-const Home: NextPage = () => {
+const HomePage: NextPage = () => {
   return (
-    <>
-      <Head>
-        <title>Blog</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <div />
-    </>
+    <Layout title="Home">
+      <Analyze />
+    </Layout>
   )
 }
 
-export default Home
+export default HomePage

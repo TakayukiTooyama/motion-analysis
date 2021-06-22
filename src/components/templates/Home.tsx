@@ -4,9 +4,6 @@ import { Box, Button, Stack, useDisclosure } from '@chakra-ui/react'
 import styled from '@emotion/styled'
 import { drawKeypoints, drawSkeleton } from 'utils/utilities'
 import DeleteDialog from 'components/AlertDialog'
-import dynamic from 'next/dynamic'
-import { css, jsx } from '@emotion/react'
-import { useEffect } from 'react'
 
 type PoseData = {
   poses: posenet.Pose
@@ -30,7 +27,7 @@ const Home: VFC = () => {
   const image = canvasImgRef.current
 
   const [fileURL, setFileURL] = useState(null)
-  const [poseData, setPoseData] = useState<PoseData[]>([])
+  const [, setPoseData] = useState<PoseData[]>([])
 
   const imageRef0 = useRef<HTMLImageElement>(null)
   const imageRef1 = useRef<HTMLImageElement>(null)
@@ -42,7 +39,7 @@ const Home: VFC = () => {
     { id: 1, url: '', text: '1歩目の' },
     { id: 2, url: '', text: '2歩目の' },
   ])
-  const [analyze, setAnalyze] = useState(false)
+  const [, setAnalyze] = useState(false)
 
   // 画像が選択されているかどうか
   const [state, setState] = useState<[boolean, boolean, boolean]>([

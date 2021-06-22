@@ -2,7 +2,7 @@ import React, { useRef, useState, VFC } from 'react'
 import * as posenet from '@tensorflow-models/posenet'
 import { Box, Button, HStack, Stack, useDisclosure } from '@chakra-ui/react'
 import styled from '@emotion/styled'
-import { angle, drawKeypoints, drawSkeleton } from 'utils/utilities'
+import { drawKeypoints, drawSkeleton } from 'utils/utilities'
 import DeleteDialog from 'components/AlertDialog'
 
 type PoseData = {
@@ -27,7 +27,7 @@ const Home: VFC = () => {
   const image = canvasImgRef.current
 
   const [fileURL, setFileURL] = useState(null)
-  const [poseData, setPoseData] = useState<PoseData[]>([])
+  const [, setPoseData] = useState<PoseData[]>([])
 
   const imageRef0 = useRef<HTMLImageElement>(null)
   const imageRef1 = useRef<HTMLImageElement>(null)

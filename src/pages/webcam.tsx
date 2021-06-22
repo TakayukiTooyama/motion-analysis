@@ -1,5 +1,4 @@
 import { NextPage } from 'next'
-import * as tf from '@tensorflow/tfjs'
 import * as posenet from '@tensorflow-models/posenet'
 import { useEffect, useRef, useState } from 'react'
 
@@ -20,7 +19,7 @@ import { useEffect, useRef, useState } from 'react'
 const WebcamPage: NextPage = () => {
   const [fileURL, setFileURL] = useState(null)
   const playerRef = useRef(null)
-  const [poses, setPoses] = useState<posenet.Pose>(null)
+  const [, setPoses] = useState<posenet.Pose>(null)
   const [taskId, setTaskId] = useState(null)
 
   useEffect(() => {

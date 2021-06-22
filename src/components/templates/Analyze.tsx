@@ -7,6 +7,7 @@ import {
   HStack,
   Stack,
   useDisclosure,
+  Text,
 } from '@chakra-ui/react'
 import styled from '@emotion/styled'
 import { drawKeypoints, drawSkeleton } from 'utils/utilities'
@@ -338,6 +339,16 @@ const Home: VFC = () => {
         selectedImage={selectedImage}
       />
       <Canvas ref={canvasImgRef} />
+      <Box shadow="base" borderRadius="10px" p={4}>
+        <Heading as="h2" size="md" mb={4} textAlign="center">
+          今後の展開
+        </Heading>
+        <Text>
+          スタート時の関節角度や歩幅、スタート速度を出し、練習から客観的なデータを使って分析できるようにする。
+          また、今回は無償のPoseNetを使って実装したが、AnyMotionなどのサービスを使った時と人の手による2次元動作分析を行った時などそれぞれどの程度差異が生まれるのか検証する。
+          他にも、スタート動作だけではなく、陸上のあらゆる動作や他のスポーツの動作でも検証する。
+        </Text>
+      </Box>
     </Stack>
   )
 }

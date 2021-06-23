@@ -16,7 +16,7 @@ type Props = {
   selectedImage: { id: number; text: string }
   isOpen: boolean
   onClose: () => void
-  deleteImage: (id: number) => void
+  deleteImage: (ids: number[]) => void
   status: 'analyze' | 'delete'
 }
 
@@ -65,7 +65,7 @@ const DeleteDialog: VFC<Props> = ({
                 borderRadius="30px"
                 colorScheme="red"
                 ml={3}
-                onClick={() => deleteImage(selectedImage.id)}
+                onClick={() => deleteImage([selectedImage.id])}
               >
                 OK
               </Button>

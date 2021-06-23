@@ -95,8 +95,11 @@ const Home: VFC = () => {
         setAnalyze(true)
         const image = ref.current
 
-        const poses = await net.estimateSinglePose(image, {
+        const poses = await net.estimateMultiplePoses(image, {
           flipHorizontal: false,
+          maxDetections: 5,
+          scoreThreshold: 0.5,
+          nmsRadius: 20,
         })
 
         const imageWidth = image.clientWidth
@@ -106,35 +109,6 @@ const Home: VFC = () => {
 
         state[idx] = false
         setState(state)
-        /*
-            0	鼻
-            1	左目
-            2	右目
-            3	左耳
-            4	右耳
-            5	左肩
-            6	右肩
-            7	左肘
-            8	右肘
-            9	左手首
-            10	右手首
-            11	左尻
-            12	右尻
-            13	左膝
-            14	右膝
-            15	左足首
-            16	右足首
-          */
-        // console.log(poses.keypoints)
-        // console.log(
-        //   '腰の位置',
-        //   Math.max(
-        //     poses.keypoints[11].position.y,
-        //     poses.keypoints[12].position.y,
-        //   ),
-        // )
-
-        // angle([])
 
         drawCanvas(poses, imageWidth, imageHeight, idx)
       }
@@ -143,7 +117,7 @@ const Home: VFC = () => {
   }
 
   const drawCanvas = (
-    pose: posenet.Pose,
+    poses: posenet.Pose[],
     imageWidth: number,
     imageHeight: number,
     idx: number,
@@ -155,8 +129,10 @@ const Home: VFC = () => {
     selectedCanvas.width = imageWidth
     selectedCanvas.height = imageHeight
 
-    drawKeypoints(pose['keypoints'], 0.7, ctx)
-    drawSkeleton(pose['keypoints'], 0.7, ctx)
+    for (let i = 0; i < poses.length; i++) {
+      drawKeypoints(poses[i]['keypoints'], 0.7, ctx)
+      drawSkeleton(poses[i]['keypoints'], 0.7, ctx)
+    }
   }
 
   const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -256,15 +232,15 @@ const Home: VFC = () => {
       <Grid templateColumns="repeat(3, 1fr)" alignItems="center">
         <Box />
         <Heading as="h2" size="md" textAlign="center" pt={2}>
-          スタート動作分析（1人用）
+          スタート動作分析（複数人用）
         </Heading>
         <Button
           shadow="base"
           colorScheme="teal"
           w="100px"
-          onClick={() => router.push('/multiple')}
+          onClick={() => router.push('/')}
         >
-          2人以上
+          1人用
         </Button>
       </Grid>
       <Video id="video" src={fileURL} controls ref={videoRef} />
@@ -443,16 +419,6 @@ const Home: VFC = () => {
         status={status}
       />
       <Canvas ref={canvasImgRef} />
-      <Box shadow="base" borderRadius="10px" p={4}>
-        <Heading as="h2" size="md" mb={4} textAlign="center">
-          今後の展開
-        </Heading>
-        <Text>
-          スタート時の関節角度や歩幅、スタート速度を出し、練習から客観的なデータを使って分析できるようにする。
-          また、今回は無償のPoseNetを使って実装したが、AnyMotionなどのサービスを使った時と人の手による2次元動作分析を行った時などそれぞれどの程度差異が生まれるのか検証する。
-          他にも、スタート動作だけではなく、陸上のあらゆる動作や他のスポーツの動作でも検証する。
-        </Text>
-      </Box>
     </Stack>
   )
 }

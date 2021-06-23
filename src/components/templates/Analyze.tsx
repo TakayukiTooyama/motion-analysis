@@ -8,6 +8,7 @@ import {
   Stack,
   useDisclosure,
   Text,
+  Flex,
 } from '@chakra-ui/react'
 import styled from '@emotion/styled'
 import { drawKeypoints, drawSkeleton } from 'utils/utilities'
@@ -50,6 +51,7 @@ const Home: VFC = () => {
   const [analyze, setAnalyze] = useState(false)
 
   const [loading, setLoading] = useState(false)
+  const [status, setStatus] = useState<'delete' | 'analyze'>('delete')
 
   // 画像が選択されているかどうか
   const [state, setState] = useState<[boolean, boolean, boolean]>([
@@ -61,6 +63,7 @@ const Home: VFC = () => {
   // Load posenet
   const startPosenet = async () => {
     setLoading(true)
+    setStatus('analyze')
     const net = await posenet.load({
       architecture: 'ResNet50',
       outputStride: 16,
@@ -97,24 +100,24 @@ const Home: VFC = () => {
         state[idx] = false
         setState(state)
         /*
-          0	鼻
-          1	左目
-          2	右目
-          3	左耳
-          4	右耳
-          5	左肩
-          6	右肩
-          7	左肘
-          8	右肘
-          9	左手首
-          10	右手首
-          11	左尻
-          12	右尻
-          13	左膝
-          14	右膝
-          15	左足首
-          16	右足首
-        */
+            0	鼻
+            1	左目
+            2	右目
+            3	左耳
+            4	右耳
+            5	左肩
+            6	右肩
+            7	左肘
+            8	右肘
+            9	左手首
+            10	右手首
+            11	左尻
+            12	右尻
+            13	左膝
+            14	右膝
+            15	左足首
+            16	右足首
+          */
         // console.log(poses.keypoints)
         // console.log(
         //   '腰の位置',
@@ -129,6 +132,7 @@ const Home: VFC = () => {
         drawCanvas(poses, imageWidth, imageHeight, idx)
       }
     })
+    onOpen()
   }
 
   const drawCanvas = (
@@ -146,11 +150,11 @@ const Home: VFC = () => {
 
     drawKeypoints(pose['keypoints'], 0.7, ctx)
     drawSkeleton(pose['keypoints'], 0.7, ctx)
-    setLoading(false)
   }
 
   const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFileURL(URL.createObjectURL(e.target.files[0]))
+    video.load()
   }
 
   const handleImageUpload = (
@@ -167,7 +171,6 @@ const Home: VFC = () => {
 
   const handleVideoAnalyze = () => {
     setPoseData([])
-    // video.load()
     startPosenet()
     // setTimeout(() => {
     //   video.play()
@@ -199,12 +202,12 @@ const Home: VFC = () => {
         id: imgId,
         url: image.toDataURL(),
       }
-      console.log(images)
       setImages([...images])
     }
   }
 
   const ImageOnClick = (id: number, text: string) => {
+    setStatus('delete')
     onOpen()
     setSelectedImage({ id, text })
   }
@@ -240,7 +243,7 @@ const Home: VFC = () => {
 
   return (
     <Stack spacing={4} pb={8}>
-      <Heading as="h2" size="md" textAlign="center">
+      <Heading as="h2" size="md" textAlign="center" pt={2}>
         スタート動作分析（1人用）
       </Heading>
       <Video id="video" src={fileURL} controls ref={videoRef} />
@@ -298,37 +301,74 @@ const Home: VFC = () => {
       >
         {loading ? '解析中' : '解析'}
       </Button>
-      <Box display={analyze ? 'block' : 'none'}>
+      <Box display={analyze ? 'block' : 'none'} pt={8}>
         <Stack spacing={8} align="center">
           {images[0].url && (
-            <Box position="relative" display="flex">
-              <AnalyzeImage
-                style={{ position: `${style0}` }}
-                src={images[0].url}
-                ref={imageRef0}
-              />
-              <CanvasImg ref={canvasRef0} />
-            </Box>
+            <>
+              <Text fontSize="20px">セット後</Text>
+              <Box position="relative" display="flex">
+                <AnalyzeImage
+                  style={{ position: `${style0}` }}
+                  src={images[0].url}
+                  ref={imageRef0}
+                />
+                <CanvasImg ref={canvasRef0} />
+              </Box>
+              <Flex shadow="base" h="100%" p={4} justifyContent="center">
+                <Box mr={8}>
+                  <Text mb={2}>腰の位置 : 〜〜</Text>
+                  <Text>前足角度: 〜〜</Text>
+                </Box>
+                <Box>
+                  <Text mb={2}>上半身の角度 : 〜〜</Text>
+                  <Text>後足角度: 〜〜</Text>
+                </Box>
+              </Flex>
+            </>
           )}
           {images[1].url && (
-            <Box position="relative" display="flex">
-              <AnalyzeImage
-                style={{ position: `${style1}` }}
-                src={images[1].url}
-                ref={imageRef1}
-              />
-              <CanvasImg ref={canvasRef1} />
-            </Box>
+            <>
+              <Text fontSize="20px">押し切り時</Text>
+              <Box position="relative" display="flex">
+                <AnalyzeImage
+                  style={{ position: `${style1}` }}
+                  src={images[1].url}
+                  ref={imageRef1}
+                />
+                <CanvasImg ref={canvasRef1} />
+              </Box>
+              <Flex shadow="base" h="100%" p={4} justifyContent="center">
+                <Box mr={8}>
+                  <Text mb={2}>引く腕の角度 : 〜〜</Text>
+                  <Text mb={2}>1歩目の膝の角度 : 〜〜</Text>
+                </Box>
+                <Box>
+                  <Text>前に出す腕の角度: 〜〜</Text>
+                </Box>
+              </Flex>
+            </>
           )}
           {images[2].url && (
-            <Box position="relative" display="flex">
-              <AnalyzeImage
-                style={{ position: `${style2}` }}
-                src={images[2].url}
-                ref={imageRef2}
-              />
-              <CanvasImg ref={canvasRef2} />
-            </Box>
+            <>
+              <Text fontSize="20px">1歩目</Text>
+              <Box position="relative" display="flex">
+                <AnalyzeImage
+                  style={{ position: `${style2}` }}
+                  src={images[2].url}
+                  ref={imageRef2}
+                />
+                <CanvasImg ref={canvasRef2} />
+              </Box>
+              <Flex shadow="base" h="100%" p={4} justifyContent="center">
+                <Box mr={8}>
+                  <Text mb={2}>歩幅 : 〜〜</Text>
+                  <Text>上体角度: 〜〜</Text>
+                </Box>
+                <Box>
+                  <Text mb={2}>前膝角度 : 〜〜</Text>
+                </Box>
+              </Flex>
+            </>
           )}
         </Stack>
       </Box>
@@ -337,6 +377,7 @@ const Home: VFC = () => {
         onClose={onClose}
         deleteImage={deleteImage}
         selectedImage={selectedImage}
+        status={status}
       />
       <Canvas ref={canvasImgRef} />
       <Box shadow="base" borderRadius="10px" p={4}>

@@ -13,7 +13,7 @@ const Layout: FC<Props> = ({ children, title }) => (
       <title>{title}</title>
     </Head>
     <Header />
-    <Container as="main" maxW="xl" bg="white" shadow="base" pt={2}>
+    <Container as="main" maxW="xl" bg="white" shadow="base">
       {children}
     </Container>
   </Box>

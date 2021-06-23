@@ -17,6 +17,7 @@ type Props = {
   isOpen: boolean
   onClose: () => void
   deleteImage: (id: number) => void
+  status: 'analyze' | 'delete'
 }
 
 const DeleteDialog: VFC<Props> = ({
@@ -24,6 +25,7 @@ const DeleteDialog: VFC<Props> = ({
   isOpen,
   onClose,
   deleteImage,
+  status,
 }) => {
   const cancelRef = useRef()
 
@@ -38,22 +40,46 @@ const DeleteDialog: VFC<Props> = ({
       <AlertDialogOverlay />
 
       <AlertDialogContent>
-        <AlertDialogHeader>画像削除</AlertDialogHeader>
+        <AlertDialogHeader textAlign="center">
+          {status === 'delete' ? '画像削除' : '解析完了'}
+        </AlertDialogHeader>
         <AlertDialogCloseButton />
-        <AlertDialogBody>
-          {selectedImage.text}画像を削除してもよろしいですか？
+        <AlertDialogBody textAlign="center">
+          {status === 'delete'
+            ? `${selectedImage.text}画像を削除してもよろしいですか？`
+            : 'もし解析に時間がかかるようであればこの間に撮った動画を見れるようにする。また、別なページに遷移させ、動画に対してフィードバックする。（予定）'}
         </AlertDialogBody>
         <AlertDialogFooter>
-          <Button ref={cancelRef} onClick={onClose}>
-            戻る
-          </Button>
-          <Button
-            colorScheme="red"
-            ml={3}
-            onClick={() => deleteImage(selectedImage.id)}
-          >
-            OK
-          </Button>
+          {status === 'delete' ? (
+            <>
+              <Button
+                ref={cancelRef}
+                onClick={onClose}
+                w="100%"
+                borderRadius="30px"
+              >
+                戻る
+              </Button>
+              <Button
+                w="100%"
+                borderRadius="30px"
+                colorScheme="red"
+                ml={3}
+                onClick={() => deleteImage(selectedImage.id)}
+              >
+                OK
+              </Button>
+            </>
+          ) : (
+            <Button
+              w="100%"
+              colorScheme="teal"
+              borderRadius="30px"
+              onClick={onClose}
+            >
+              結果を見る
+            </Button>
+          )}
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

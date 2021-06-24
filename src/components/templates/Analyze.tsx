@@ -9,12 +9,11 @@ import {
   useDisclosure,
   Text,
   Flex,
-  Grid,
+  SimpleGrid,
 } from '@chakra-ui/react'
 import styled from '@emotion/styled'
 import { drawKeypoints, drawSkeleton } from 'utils/utilities'
 import DeleteDialog from 'components/AlertDialog'
-import { useRouter } from 'next/router'
 
 type PoseData = {
   poses: posenet.Pose
@@ -23,7 +22,6 @@ type PoseData = {
 
 const Home: VFC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const router = useRouter()
   const [selectedImage, setSelectedImage] = useState<{
     id: number
     text: string
@@ -58,6 +56,7 @@ const Home: VFC = () => {
 
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState<'delete' | 'analyze'>('delete')
+  const [multiple, setMultiple] = useState(false)
 
   // 画像が選択されているかどうか
   const [state, setState] = useState<[boolean, boolean, boolean, boolean]>([
@@ -95,9 +94,16 @@ const Home: VFC = () => {
         setAnalyze(true)
         const image = ref.current
 
-        const poses = await net.estimateSinglePose(image, {
-          flipHorizontal: false,
-        })
+        const poses = multiple
+          ? await net.estimateMultiplePoses(image, {
+              flipHorizontal: false,
+              maxDetections: 5,
+              scoreThreshold: 0.5,
+              nmsRadius: 20,
+            })
+          : await net.estimateSinglePose(image, {
+              flipHorizontal: false,
+            })
 
         const imageWidth = image.clientWidth
         const imageHeight = image.clientHeight
@@ -139,11 +145,12 @@ const Home: VFC = () => {
         drawCanvas(poses, imageWidth, imageHeight, idx)
       }
     })
+    setLoading(false)
     onOpen()
   }
 
   const drawCanvas = (
-    pose: posenet.Pose,
+    pose: posenet.Pose | posenet.Pose[],
     imageWidth: number,
     imageHeight: number,
     idx: number,
@@ -155,8 +162,16 @@ const Home: VFC = () => {
     selectedCanvas.width = imageWidth
     selectedCanvas.height = imageHeight
 
-    drawKeypoints(pose['keypoints'], 0.7, ctx)
-    drawSkeleton(pose['keypoints'], 0.7, ctx)
+    if (multiple) {
+      const poses = pose as posenet.Pose[]
+      for (let i = 0; i < poses.length; i++) {
+        drawKeypoints(poses[i]['keypoints'], 0.6, ctx)
+        drawSkeleton(poses[i]['keypoints'], 0.5, ctx)
+      }
+    } else {
+      drawKeypoints(pose['keypoints'], 0.6, ctx)
+      drawSkeleton(pose['keypoints'], 0.5, ctx)
+    }
   }
 
   const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -253,20 +268,29 @@ const Home: VFC = () => {
 
   return (
     <Stack spacing={4} pb={8}>
-      <Grid templateColumns="repeat(3, 1fr)" alignItems="center">
-        <Box />
-        <Heading as="h2" size="md" textAlign="center" pt={2}>
-          スタート動作分析（1人用）
-        </Heading>
+      <Heading as="h2" size="md" textAlign="center" pt={6} pb={2}>
+        スタート動作分析{multiple ? '（複数人用）' : '（1人用）'}
+      </Heading>
+      <HStack align="center" pb={6}>
         <Button
           shadow="base"
-          colorScheme="teal"
-          w="100px"
-          onClick={() => router.push('/multiple')}
+          colorScheme={multiple ? null : 'teal'}
+          w="100%"
+          borderRadius="full"
+          onClick={() => setMultiple(false)}
         >
-          2人以上
+          1人用
         </Button>
-      </Grid>
+        <Button
+          shadow="base"
+          w="100%"
+          colorScheme={multiple ? 'teal' : null}
+          borderRadius="full"
+          onClick={() => setMultiple(true)}
+        >
+          複数人用
+        </Button>
+      </HStack>
       <Video id="video" src={fileURL} controls ref={videoRef} />
       <Button colorScheme="teal" variant="outline" p={0} w="100%">
         <Label>
@@ -286,48 +310,44 @@ const Home: VFC = () => {
       >
         キャプチャ
       </Button>
-      <Stack w="100%">
-        <HStack>
-          {images[0].url ? (
-            <Image
-              src={images[0].url}
-              onClick={() => ImageOnClick(images[0].id, images[0].text)}
-              ref={imageRef0}
-            />
-          ) : (
-            <NoImage id={images[0].id} text={images[0].text} />
-          )}
-          {images[1].url ? (
-            <Image
-              src={images[1].url}
-              onClick={() => ImageOnClick(images[1].id, images[1].text)}
-              ref={imageRef1}
-            />
-          ) : (
-            <NoImage id={images[1].id} text={images[1].text} />
-          )}
-        </HStack>
-        <HStack>
-          {images[2].url ? (
-            <Image
-              src={images[2].url}
-              onClick={() => ImageOnClick(images[2].id, images[2].text)}
-              ref={imageRef2}
-            />
-          ) : (
-            <NoImage id={images[2].id} text={images[2].text} />
-          )}
-          {images[3].url ? (
-            <Image
-              src={images[3].url}
-              onClick={() => ImageOnClick(images[3].id, images[3].text)}
-              ref={imageRef3}
-            />
-          ) : (
-            <NoImage id={images[3].id} text={images[3].text} />
-          )}
-        </HStack>
-      </Stack>
+      <SimpleGrid columns={2} spacing={2}>
+        {images[0].url ? (
+          <Image
+            src={images[0].url}
+            onClick={() => ImageOnClick(images[0].id, images[0].text)}
+            ref={imageRef0}
+          />
+        ) : (
+          <NoImage id={images[0].id} text={images[0].text} />
+        )}
+        {images[1].url ? (
+          <Image
+            src={images[1].url}
+            onClick={() => ImageOnClick(images[1].id, images[1].text)}
+            ref={imageRef1}
+          />
+        ) : (
+          <NoImage id={images[1].id} text={images[1].text} />
+        )}
+        {images[2].url ? (
+          <Image
+            src={images[2].url}
+            onClick={() => ImageOnClick(images[2].id, images[2].text)}
+            ref={imageRef2}
+          />
+        ) : (
+          <NoImage id={images[2].id} text={images[2].text} />
+        )}
+        {images[3].url ? (
+          <Image
+            src={images[3].url}
+            onClick={() => ImageOnClick(images[3].id, images[3].text)}
+            ref={imageRef3}
+          />
+        ) : (
+          <NoImage id={images[3].id} text={images[3].text} />
+        )}
+      </SimpleGrid>
       <Button
         colorScheme="teal"
         variant="outline"
@@ -445,6 +465,14 @@ const Home: VFC = () => {
       <Canvas ref={canvasImgRef} />
       <Box shadow="base" borderRadius="10px" p={4}>
         <Heading as="h2" size="md" mb={4} textAlign="center">
+          補足
+        </Heading>
+        <Text>
+          Safariで見ている場合は2回解析が必要かもしれません。のちに修正します。
+        </Text>
+      </Box>
+      <Box shadow="base" borderRadius="10px" p={4}>
+        <Heading as="h2" size="md" mb={4} textAlign="center">
           今後の展開
         </Heading>
         <Text>
@@ -460,7 +488,6 @@ const Home: VFC = () => {
 export default Home
 
 const Image = styled.img`
-  width: calc(33.3% - 0.33rem);
   width: 100%;
   height: 150px;
   z-index: 1;

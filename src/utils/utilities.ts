@@ -92,4 +92,5 @@ export function angle(
   const bcn = bc[0] * bc[0] + bc[1] * bc[1]
   const radian = Math.acos(babc / Math.sqrt(ban * bcn))
   const angle = (radian * 180) / Math.PI
+  console.log(angle)
 }
